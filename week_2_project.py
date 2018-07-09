@@ -1,0 +1,102 @@
+'''ALGORITHMIC THINKING Class 2 Week 2'''
+
+import math
+import random
+#import clusterclass as alg_cluster
+
+def slow_closest_pair(cluster_list):
+  '''Given a list of Cluster objects, return a closest pair where the pair is 
+  represented by the tuple (dist, idx1, idx2)'''
+  output_tuple = (float('inf'), -1, -1)
+  min_distance = float('inf')
+  for idx in range(0, len(cluster_list) - 1):
+    for jdx in range(idx + 1, len(cluster_list)):
+      cluster_one = cluster_list[idx]
+      cluster_two = cluster_list[jdx]
+      if cluster_one.distance(cluster_two) < min_distance:
+        min_distance = cluster_one.distance(cluster_two)
+        output_tuple = (min_distance, idx, jdx)
+
+  return output_tuple
+
+def closest_pair_strip(cluster_list, horiz_center, half_width):
+  '''Given a list of Cluster objects and two floats: horiz_center and half_width
+  (Half_width = max distance of any pt in the strip from the center line),
+  return the closest pair of pts that are in that strip.'''
+
+  within_strip_indices = []
+  for idx in range(0, len(cluster_list)):
+    cluster = cluster_list[idx]
+    if abs(cluster.horiz_center() - horiz_center) < half_width:
+      within_strip_indices.append(idx)
+  
+  within_strip_indices.sort(key = lambda index: cluster_list[index].vert_center())
+  number_points_within_strip = len(within_strip_indices)
+  output_tuple = (float('inf'), -1, -1)
+  min_distance = float('inf')
+
+
+  #ALL BUT THE LAST ONE IS WHERE THE -2 COMES FROM
+  for idx in range(0, number_points_within_strip - 1):
+    for jdx in range(idx + 1, min(idx + 4, number_points_within_strip)):
+      original_idx_one = within_strip_indices[idx]
+      original_idx_two = within_strip_indices[jdx]
+      cluster_one = cluster_list[original_idx_one]
+      cluster_two = cluster_list[original_idx_two]
+      if cluster_one.distance(cluster_two) < min_distance:
+        min_distance = cluster_one.distance(cluster_two)
+        if original_idx_one < original_idx_two:
+          output_tuple = (min_distance, original_idx_one, original_idx_two)
+        else:
+          output_tuple = (min_distance, original_idx_two, original_idx_one)
+        
+
+  return output_tuple
+
+def fast_closest_pair(cluster_list):
+  '''Fast version of slow_closest_pair'''
+
+  number_clusters = len(cluster_list)
+
+  if number_clusters < 3:
+    output_tuple = slow_closest_pair(cluster_list)
+  else:
+    midpoint = int(math.ceil(number_clusters / 2))
+    left_portion = cluster_list[0:midpoint]
+    right_portion = cluster_list[midpoint:number_clusters]
+    left_min = fast_closest_pair(left_portion)
+    right_min = fast_closest_pair(right_portion)
+    if left_min[0] <= right_min[0]:
+      output_tuple = left_min
+    else:
+      output_tuple = (right_min[0], right_min[1] + midpoint, right_min[2] + midpoint)
+    cutoff_x = (cluster_list[midpoint - 1].horiz_center() + cluster_list[midpoint].horiz_center()) / 2
+    closest_pair_strip_result = closest_pair_strip(cluster_list, cutoff_x, output_tuple[0])
+    if closest_pair_strip_result[0] < output_tuple[0]:
+      output_tuple = closest_pair_strip_result
+
+  return output_tuple
+
+def hierarchical_clustering(cluster_list, num_clusters):
+
+  '''Given a list of cluster objects and number of clusters, cluster some clusters together until you have num_clusters clusters'''
+
+  cluster_list.sort(key = lambda cluster: cluster.horiz_center())
+  while len(cluster_list) > num_clusters:
+
+    fast_closest_pair_info = fast_closest_pair(cluster_list)
+    cluster_one_index = fast_closest_pair_info[1]
+    cluster_two_index = fast_closest_pair_info[2]
+    cluster_one = cluster_list[cluster_one_index]
+    cluster_two = cluster_list[cluster_two_index]
+    cluster_one.merge_clusters(cluster_two)
+    cluster_list[cluster_one_index] = cluster_one
+    cluster_list.pop(cluster_two_index)
+
+  return cluster_list
+
+
+def kmeans_clustering(cluster_list, num_clusters, num_iterations):
+  pass
+#print fast_closest_pair([alg_cluster.Cluster(set([]), 0, 0, 1, 0), alg_cluster.Cluster(set([]), 0, 1, 1, 0), alg_cluster.Cluster(set([]), 0, 2, 1, 0)])
+#print closest_pair_strip([alg_cluster.Cluster(set([]), 1.0, 1.0, 1, 0), alg_cluster.Cluster(set([]), 1.0, 5.0, 1, 0), alg_cluster.Cluster(set([]), 1.0, 4.0, 1, 0), alg_cluster.Cluster(set([]), 1.0, 7.0, 1, 0)], 1.0, 3.0)
