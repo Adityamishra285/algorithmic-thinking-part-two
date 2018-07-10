@@ -2,7 +2,7 @@
 
 import math
 import random
-import alg_cluster as alg_cluster
+import clusterclass as alg_cluster
 
 def slow_closest_pair(cluster_list):
   '''Given a list of Cluster objects, return a closest pair where the pair is 
