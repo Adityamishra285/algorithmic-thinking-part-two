@@ -95,8 +95,49 @@ def hierarchical_clustering(cluster_list, num_clusters):
 
   return cluster_list
 
+def get_nearest_center(cluster, center_clusters):
+  max_distance = -1
+  nearest_center_cluster = None
+
+  for center_cluster in center_clusters:
+    distance = cluster.distance(center_cluster)
+    if distance > max_distance:
+      max_distance = distance
+      nearest_center_cluster = center_cluster
+
+  return nearest_center_cluster
+
 
 def kmeans_clustering(cluster_list, num_clusters, num_iterations):
-  pass
+
+  '''Given a list of cluster objects, number of iterations, and number of clusters required, create a new list of clusters using
+  k-means clustering'''
+
+  #sort the current cluster list by population
+  cluster_list.sort(key = lambda cluster: cluster.total_population(), reverse=True)
+  #create an initial list of clusters where we initialize a group of clusters equal to num_clusters, taking the first of the sorted cluster list
+  center_positions = []
+  for idx in range(0, num_clusters):
+    current_cluster = cluster_list[idx]
+    center_positions.push((current_cluster.horiz_center(), current_cluster.vert_center()))
+  #map the center positions so that they are not modified.
+
+  #for each iteration:
+  for jdx in range(0, num_iterations):
+    #Make num_clusters empty clusters(same length as the population list we made)
+    center_clusters = []
+    for position in center_positions:
+      center_clusters.push(alg_cluster.Cluster(set([])), position[0], position[1], 0, 0)
+      #these clusters should have no counties and no total population
+    for cluster in cluster_list:
+      nearest_center = get_nearest_center(cluster, center_clusters)
+    #for each element in the cluster list, find the right cluster to merge it with.
+    #once you find it, merge clusters(update the current cluster list)
+    #replace each center position with the each center position.
+
+  #return the final cluster list
+
+
+
 #print fast_closest_pair([alg_cluster.Cluster(set([]), 0, 0, 1, 0), alg_cluster.Cluster(set([]), 0, 1, 1, 0), alg_cluster.Cluster(set([]), 0, 2, 1, 0)])
 #print closest_pair_strip([alg_cluster.Cluster(set([]), 1.0, 1.0, 1, 0), alg_cluster.Cluster(set([]), 1.0, 5.0, 1, 0), alg_cluster.Cluster(set([]), 1.0, 4.0, 1, 0), alg_cluster.Cluster(set([]), 1.0, 7.0, 1, 0)], 1.0, 3.0)
