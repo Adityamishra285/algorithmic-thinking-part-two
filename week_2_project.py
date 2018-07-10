@@ -123,7 +123,6 @@ def kmeans_clustering(cluster_list, num_clusters, num_iterations):
   #sort the current cluster list by population
   cluster_list_copy.sort(key = lambda cluster: cluster.total_population(), reverse=True)
   #create an initial list of clusters where we initialize a group of clusters equal to num_clusters, taking the first of the sorted cluster list
-  print cluster_list_copy
   center_positions = []
   for idx in range(0, num_clusters):
     current_cluster = cluster_list_copy[idx]
