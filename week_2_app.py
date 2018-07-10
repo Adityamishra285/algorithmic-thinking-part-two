@@ -97,3 +97,27 @@ clustering to the 3108 cancer risk data set using 5 iterations. You may submit a
 colored by clusters or an enhanced visualization with the original counties colored by cluster
 and linked to the center of their corresponding clusters by lines.
 '''
+
+'''
+QUESTION 4:
+Which clustering method is faster when the number of output clusters is either a small fixed number
+or a small fraction of the number of input clusters? Provide a short explanation in terms of the asymptotic 
+running times of both methods. 
+
+K-means clustering is much faster when the number of clusters is a small fraction of the number
+of input clusters. The running time here should be O(k * n) where n is the cluster
+list length, and which if k is much smaller than n, should reduce to O(n).
+This is because for k-means clustering, as long as the number of iterations stays small, the
+number of distance comparisons between clusters is much lower since the centers are predetermined. 
+
+Hierarchical clustering, on the other hand performs fast closest pair a number of times equal to the initial 
+size of the input list minus the desired number of output clusters, which results in O((n - k)n log n),
+which will be considerably higher than O(n).
+'''
+
+'''
+QUESTION 5:
+
+'''
+
+
