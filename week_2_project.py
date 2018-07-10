@@ -2,7 +2,7 @@
 
 import math
 import random
-#import clusterclass as alg_cluster
+import alg_cluster as alg_cluster
 
 def slow_closest_pair(cluster_list):
   '''Given a list of Cluster objects, return a closest pair where the pair is 
@@ -95,46 +95,61 @@ def hierarchical_clustering(cluster_list, num_clusters):
 
   return cluster_list
 
-def get_nearest_center(cluster, center_clusters):
-  max_distance = -1
-  nearest_center_cluster = None
+def get_nearest_center_index(cluster, center_positions):
+  '''Given a cluster and a list of center positions, return the index corresponding to the nearest center position to that cluster'''
+  min_distance = float('inf')
+  nearest_center_index = 0
+  current_index = 0
 
-  for center_cluster in center_clusters:
-    distance = cluster.distance(center_cluster)
-    if distance > max_distance:
-      max_distance = distance
-      nearest_center_cluster = center_cluster
+  for center_position in center_positions:
+    horiz_dist = cluster.horiz_center() - center_position[0]
+    vert_dist = cluster.vert_center() - center_position[1]  
+    distance = math.sqrt(vert_dist ** 2 + horiz_dist ** 2)
+    if distance < min_distance:
+      min_distance = distance
+      nearest_center_index = current_index
+    current_index += 1
 
-  return nearest_center_cluster
+  return nearest_center_index
 
 
 def kmeans_clustering(cluster_list, num_clusters, num_iterations):
 
   '''Given a list of cluster objects, number of iterations, and number of clusters required, create a new list of clusters using
   k-means clustering'''
+  cluster_list_copy = []
+  for cluster in cluster_list:
+    cluster_list_copy.append(cluster.copy())
 
   #sort the current cluster list by population
-  cluster_list.sort(key = lambda cluster: cluster.total_population(), reverse=True)
+  cluster_list_copy.sort(key = lambda cluster: cluster.total_population(), reverse=True)
   #create an initial list of clusters where we initialize a group of clusters equal to num_clusters, taking the first of the sorted cluster list
   center_positions = []
   for idx in range(0, num_clusters):
-    current_cluster = cluster_list[idx]
-    center_positions.push((current_cluster.horiz_center(), current_cluster.vert_center()))
+    current_cluster = cluster_list_copy[idx]
+    center_positions.append((current_cluster.horiz_center(), current_cluster.vert_center()))
   #map the center positions so that they are not modified.
 
   #for each iteration:
-  for jdx in range(0, num_iterations):
+  for dummy_jdx in range(0, num_iterations):
     #Make num_clusters empty clusters(same length as the population list we made)
     center_clusters = []
-    for position in center_positions:
-      center_clusters.push(alg_cluster.Cluster(set([])), position[0], position[1], 0, 0)
+    for kdx in range(0, len(center_positions)):
+      position = center_positions[kdx]
+      center_clusters.append(alg_cluster.Cluster(set([]), position[0], position[1], 0, 0))
       #these clusters should have no counties and no total population
-    for cluster in cluster_list:
-      nearest_center = get_nearest_center(cluster, center_clusters)
+    for cluster in cluster_list_copy:
+      nearest_center_index = get_nearest_center_index(cluster, center_positions)
+      nearest_cluster = center_clusters[nearest_center_index]
+      nearest_cluster.merge_clusters(cluster)
     #for each element in the cluster list, find the right cluster to merge it with.
     #once you find it, merge clusters(update the current cluster list)
-    #replace each center position with the each center position.
+    for kdx in range(0, len(center_clusters)):
+      current_center_cluster = center_clusters[kdx]
+      center_positions[kdx] = (current_center_cluster.horiz_center(), current_center_cluster.vert_center())
 
+    #replace each center position with the new center position.
+  return center_clusters
   #return the final cluster list
 
 
