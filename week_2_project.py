@@ -112,7 +112,6 @@ def get_nearest_center_index(cluster, center_positions):
 
   return nearest_center_index
 
-
 def kmeans_clustering(cluster_list, num_clusters, num_iterations):
 
   '''Given a list of cluster objects, number of iterations, and number of clusters required, create a new list of clusters using
@@ -151,6 +150,8 @@ def kmeans_clustering(cluster_list, num_clusters, num_iterations):
     #replace each center position with the new center position.
   return center_clusters
   #return the final cluster list
+
+
 
 
 
