@@ -73,6 +73,51 @@ def compute_alignment_matrix(seq_x, seq_y, scoring_matrix, global_flag):
   
   return alignment_matrix
 
+def compute_global_alignment(seq_x, seq_y, scoring_matrix, alignment_matrix):
+  '''
+  Takes as input two sequences whose elements share a common alphabet, a scoring matrix and an alignment matrix.
+  Returns a tuple of the form (score, align_x, align_y) where score is the max score in that alignment,
+  and align_x and align_y are the aligned sequences in string form
+  '''
+  print alignment_matrix
 
-#scoring_matrix = build_scoring_matrix(set(['G', 'C', 'A', 'T']), 20, 10, -5)
-#print compute_alignment_matrix('AT', 'TG', scoring_matrix, False)
+  row_pointer = len(seq_x)
+  col_pointer = len(seq_y)
+  aligned_seq_x = ''
+  aligned_seq_y = ''
+
+  while row_pointer > 0 and col_pointer > 0:
+    char_x = seq_x[row_pointer - 1]
+    char_y = seq_y[col_pointer - 1]
+    print row_pointer, col_pointer
+
+    if alignment_matrix[row_pointer][col_pointer] == (alignment_matrix[row_pointer - 1][col_pointer - 1] + scoring_matrix[char_x][char_y]):
+      print 'upleft'
+      aligned_seq_x = char_x + aligned_seq_x
+      aligned_seq_y = char_y + aligned_seq_y
+      row_pointer = row_pointer - 1
+      col_pointer = col_pointer - 1
+    elif alignment_matrix[row_pointer][col_pointer] == (alignment_matrix[row_pointer - 1][col_pointer] + scoring_matrix[char_x]['-']):
+      print 'up'
+      aligned_seq_x = char_x + aligned_seq_x
+      aligned_seq_y = '-' + aligned_seq_y
+      row_pointer = row_pointer - 1
+    else:
+      print 'left'
+      aligned_seq_x = '-' + aligned_seq_x
+      aligned_seq_y = char_y + aligned_seq_y
+      col_pointer = col_pointer - 1
+  while row_pointer > 0:
+    aligned_seq_x = seq_x[row_pointer - 1] + aligned_seq_x
+    aligned_seq_y = '-' + aligned_seq_y
+    row_pointer = row_pointer - 1
+  while col_pointer > 0:
+    aligned_seq_x = '-' + aligned_seq_x
+    aligned_seq_y = seq_y[col_pointer - 1] + aligned_seq_y
+    col_pointer = col_pointer - 1
+
+  return (alignment_matrix[len(seq_x)][len(seq_y)], aligned_seq_x, aligned_seq_y)
+
+#test_score_matrix = build_scoring_matrix(set(['G', 'C', 'A', 'T']), 50, 5, -10)
+#test_align_matrix = compute_alignment_matrix('AG', 'TA', test_score_matrix, True)
+#print compute_global_alignment('AG', 'TA', test_score_matrix, test_align_matrix)
