@@ -79,7 +79,6 @@ def compute_global_alignment(seq_x, seq_y, scoring_matrix, alignment_matrix):
   Returns a tuple of the form (score, align_x, align_y) where score is the max score in that alignment,
   and align_x and align_y are the aligned sequences in string form
   '''
-  print alignment_matrix
 
   row_pointer = len(seq_x)
   col_pointer = len(seq_y)
@@ -89,21 +88,17 @@ def compute_global_alignment(seq_x, seq_y, scoring_matrix, alignment_matrix):
   while row_pointer > 0 and col_pointer > 0:
     char_x = seq_x[row_pointer - 1]
     char_y = seq_y[col_pointer - 1]
-    print row_pointer, col_pointer
 
     if alignment_matrix[row_pointer][col_pointer] == (alignment_matrix[row_pointer - 1][col_pointer - 1] + scoring_matrix[char_x][char_y]):
-      print 'upleft'
       aligned_seq_x = char_x + aligned_seq_x
       aligned_seq_y = char_y + aligned_seq_y
       row_pointer = row_pointer - 1
       col_pointer = col_pointer - 1
     elif alignment_matrix[row_pointer][col_pointer] == (alignment_matrix[row_pointer - 1][col_pointer] + scoring_matrix[char_x]['-']):
-      print 'up'
       aligned_seq_x = char_x + aligned_seq_x
       aligned_seq_y = '-' + aligned_seq_y
       row_pointer = row_pointer - 1
     else:
-      print 'left'
       aligned_seq_x = '-' + aligned_seq_x
       aligned_seq_y = char_y + aligned_seq_y
       col_pointer = col_pointer - 1
@@ -118,6 +113,54 @@ def compute_global_alignment(seq_x, seq_y, scoring_matrix, alignment_matrix):
 
   return (alignment_matrix[len(seq_x)][len(seq_y)], aligned_seq_x, aligned_seq_y)
 
+def compute_local_alignment(seq_x, seq_y, scoring_matrix, alignment_matrix):
+
+  '''
+  Local version of compute global alignment.
+  '''
+
+  max_score = 0
+  row_pointer = 0
+  col_pointer = 0
+  aligned_seq_x = ''
+  aligned_seq_y = ''
+
+  for row in range(0, len(alignment_matrix)):
+    for col in range(0, len(alignment_matrix[0])):
+      if alignment_matrix[row][col] > max_score:
+        max_score = alignment_matrix[row][col]
+        row_pointer = row
+        col_pointer = col
+
+  while alignment_matrix[row_pointer][col_pointer] > 0:
+    char_x = seq_x[row_pointer - 1]
+    char_y = seq_y[col_pointer - 1]
+
+    print char_x, char_y
+
+    if alignment_matrix[row_pointer][col_pointer] == alignment_matrix[row_pointer - 1][col_pointer - 1] + scoring_matrix[char_x][char_y]:
+      aligned_seq_x = char_x + aligned_seq_x
+      aligned_seq_y = char_y + aligned_seq_y
+      row_pointer = row_pointer - 1
+      col_pointer = col_pointer - 1
+    elif alignment_matrix[row_pointer][col_pointer] == alignment_matrix[row_pointer - 1][col_pointer] + scoring_matrix[char_x]['-']:
+      aligned_seq_x = char_x + aligned_seq_x
+      aligned_seq_y = '-' + aligned_seq_y
+      row_pointer = row_pointer - 1
+    else:
+      aligned_seq_x = '-' + aligned_seq_x
+      aligned_seq_y = char_y + aligned_seq_y
+      col_pointer = col_pointer - 1
+
+  return (max_score, aligned_seq_x, aligned_seq_y)
+
+
+
+
+
+
 #test_score_matrix = build_scoring_matrix(set(['G', 'C', 'A', 'T']), 50, 5, -10)
-#test_align_matrix = compute_alignment_matrix('AG', 'TA', test_score_matrix, True)
+#test_align_matrix = compute_alignment_matrix('CAGGG', 'GGGTAAC', test_score_matrix, False)
+#print compute_local_alignment('CAGGG', 'GGGTAAC', test_score_matrix, test_align_matrix)
+
 #print compute_global_alignment('AG', 'TA', test_score_matrix, test_align_matrix)
